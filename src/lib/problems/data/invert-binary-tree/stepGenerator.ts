@@ -166,7 +166,6 @@ export function generateSteps(
     const leftIdx = 2 * nodeIndex + 1;
     const rightIdx = 2 * nodeIndex + 2;
     const leftVal = leftIdx < nodes.length ? nodes[leftIdx] : null;
-    const rightVal = rightIdx < nodes.length ? nodes[rightIdx] : null;
 
     // --- Line 3: const left = invertTree(root.left); ---
     steps.push(
@@ -191,9 +190,6 @@ export function generateSteps(
 
     // Recurse into left child
     trace(leftIdx, depth + 1, [...callStack, `L:${fmt(leftVal)}`]);
-
-    // After left recursion returns, capture the (possibly swapped) left subtree result
-    const leftResultVal = leftIdx < nodes.length ? nodes[leftIdx] : null;
 
     // --- Line 4: const right = invertTree(root.right); ---
     // Re-read rightVal since tree may have been modified by left recursion (shouldn't affect right subtree, but be safe)
@@ -221,9 +217,6 @@ export function generateSteps(
 
     // Recurse into right child
     trace(rightIdx, depth + 1, [...callStack, `R:${fmt(currentRightVal)}`]);
-
-    // After right recursion returns, capture the result
-    const rightResultVal = rightIdx < nodes.length ? nodes[rightIdx] : null;
 
     // --- Line 5: root.left = right; ---
     // Before the swap, read current children

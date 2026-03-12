@@ -1,16 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import type { AnimationStep, HighlightColor } from "@/lib/types";
-
-const colorMap: Record<HighlightColor, string> = {
-  current: "border-blue-500 bg-blue-500/20 text-blue-300",
-  secondary: "border-purple-500 bg-purple-500/20 text-purple-300",
-  success: "border-green-500 bg-green-500/20 text-green-300",
-  removed: "border-red-500 bg-red-500/20 text-red-300",
-  comparing: "border-yellow-500 bg-yellow-500/20 text-yellow-300",
-  processed: "border-gray-500 bg-gray-500/20 text-gray-400",
-};
+import type { AnimationStep } from "@/lib/types";
 
 interface TreeVisualizerProps {
   step: AnimationStep;
