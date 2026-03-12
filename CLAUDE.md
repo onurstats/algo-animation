@@ -3,12 +3,55 @@
 ## Project Overview
 Educational content platform that brings LeetCode problems to life through step-by-step animated visualizations.
 
+**Tagline:** "See the algorithm. Understand the solution."
+
 ## Tech Stack
-- Next.js 16 (App Router, Turbopack)
-- TypeScript
-- Tailwind CSS v4
+- Next.js 14+ (App Router, Turbopack)
+- TypeScript (strict mode)
+- Tailwind CSS
+- Framer Motion + HTML5 Canvas / D3.js (animation engine)
+- Shiki or Prism.js (code highlighting)
+- Zustand (state management)
+- MDX or JSON configs (problem content)
+- pnpm (package manager)
 - Deployed on Vercel: https://algo-animation-delta.vercel.app
 - GitHub: https://github.com/onurstats/algo-animation
+
+## Key Architecture
+
+### Core Directories
+- `src/app/problems/[slug]/page.tsx` — Dynamic problem animation page
+- `src/lib/algorithms/` — Step generators (one file per problem, exports `generateSteps`)
+- `src/lib/problems/data/` — Problem metadata configs
+- `src/lib/problems/registry.ts` — Central problem registry
+- `src/lib/animation/` — Animation engine (types, engine, interpolation)
+- `src/components/animation/` — Animation UI (canvas, controls, visualizers)
+- `src/components/code/` — Code panel with line highlighting
+- `src/stores/animationStore.ts` — Zustand playback store
+- `src/hooks/` — useAnimation, useKeyboardShortcuts, useResponsiveCanvas
+- `tests/algorithms/` — Unit tests for step generators
+
+### Adding a New Problem
+1. Create problem config: `src/lib/problems/data/{slug}.ts`
+2. Create step generator: `src/lib/algorithms/{slug}.ts`
+3. Register in `src/lib/problems/registry.ts`
+4. Write tests: `tests/algorithms/{slug}.test.ts`
+5. Dynamic route handles rendering automatically
+
+### Design System
+- Dark theme default (bg: #0F1117, surface: #1A1D2E)
+- Colors: blue=current, purple=secondary, green=success, red=removed, yellow=comparing, gray=processed
+- Fonts: Inter (body), JetBrains Mono (code)
+- Smooth 300ms transitions between steps
+
+### Code Style
+- Functional components with hooks
+- Animation logic separate from rendering
+- Human-friendly step descriptions
+- Pre-generate all steps before playback
+- Use `requestAnimationFrame` for canvas
+- Memoize expensive calculations
+- Lazy load problem data
 
 ## Git Branching Strategy — Git Flow
 
