@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import type { AnimationStep } from "@/lib/types";
 import { highlightStrokeColors, highlightFillColors } from "@/lib/constants/colors";
+import { asNullableNumberArray } from "@/lib/utils/stepDataGuards";
 
 interface TreeVisualizerProps {
   step: AnimationStep;
@@ -34,7 +35,7 @@ function getTreeLevels(nodes: (number | null)[]): TreeNode[][] {
 }
 
 export function TreeVisualizer({ step, width }: TreeVisualizerProps) {
-  const nodes = (step.data.nodes as (number | null)[]) ?? [];
+  const nodes = asNullableNumberArray(step.data.nodes);
   const highlightMap = new Map(step.highlights.map((h) => [h.index, h]));
   const levels = getTreeLevels(nodes);
 

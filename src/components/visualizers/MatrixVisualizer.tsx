@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import type { AnimationStep } from "@/lib/types";
 import { highlightClassMap } from "@/lib/constants/colors";
+import { asNestedNumberArray } from "@/lib/utils/stepDataGuards";
 
 interface MatrixVisualizerProps {
   step: AnimationStep;
@@ -11,7 +12,7 @@ interface MatrixVisualizerProps {
 }
 
 export function MatrixVisualizer({ step }: MatrixVisualizerProps) {
-  const matrix = (step.data.matrix as number[][]) ?? [];
+  const matrix = asNestedNumberArray(step.data.matrix);
   const highlightMap = new Map(step.highlights.map((h) => [h.index, h]));
 
   return (

@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import type { AnimationStep } from "@/lib/types";
 import { highlightClassMap } from "@/lib/constants/colors";
+import { asNumberArray } from "@/lib/utils/stepDataGuards";
 
 interface LinkedListVisualizerProps {
   step: AnimationStep;
@@ -11,7 +12,7 @@ interface LinkedListVisualizerProps {
 }
 
 export function LinkedListVisualizer({ step }: LinkedListVisualizerProps) {
-  const nodes = (step.data.nodes as number[]) ?? [];
+  const nodes = asNumberArray(step.data.nodes);
   const highlightMap = new Map(step.highlights.map((h) => [h.index, h]));
   const pointerMap = new Map(step.pointers.map((p) => [p.index, p]));
 

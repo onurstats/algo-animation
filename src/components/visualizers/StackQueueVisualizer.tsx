@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import type { AnimationStep } from "@/lib/types";
 import { highlightClassMap } from "@/lib/constants/colors";
+import { asStringArray } from "@/lib/utils/stepDataGuards";
 
 interface StackQueueVisualizerProps {
   step: AnimationStep;
@@ -11,7 +12,10 @@ interface StackQueueVisualizerProps {
 }
 
 export function StackQueueVisualizer({ step }: StackQueueVisualizerProps) {
-  const items = (step.data.stack as string[]) ?? (step.data.queue as string[]) ?? [];
+  const items =
+    asStringArray(step.data.stack).length > 0
+      ? asStringArray(step.data.stack)
+      : asStringArray(step.data.queue);
   const isStack = !!step.data.stack;
   const highlightMap = new Map(step.highlights.map((h) => [h.index, h]));
 

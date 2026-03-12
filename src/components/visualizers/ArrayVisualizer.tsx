@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import type { AnimationStep } from "@/lib/types";
 import { highlightClassMap } from "@/lib/constants/colors";
+import { asNumberArray } from "@/lib/utils/stepDataGuards";
 
 interface ArrayVisualizerProps {
   step: AnimationStep;
@@ -12,9 +13,9 @@ interface ArrayVisualizerProps {
 
 export function ArrayVisualizer({ step }: ArrayVisualizerProps) {
   const array =
-    (step.data.array as number[] | undefined) ??
-    (step.data.nums as number[] | undefined) ??
-    [];
+    asNumberArray(step.data.array).length > 0
+      ? asNumberArray(step.data.array)
+      : asNumberArray(step.data.nums);
   const highlightMap = new Map(
     step.highlights.map((h) => [h.index, h]),
   );

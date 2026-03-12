@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import type { AnimationStep } from "@/lib/types";
 import { highlightTextMap, highlightClassMap } from "@/lib/constants/colors";
+import { asNumberArray } from "@/lib/utils/stepDataGuards";
 
 interface PointerVisualizerProps {
   step: AnimationStep;
@@ -12,9 +13,9 @@ interface PointerVisualizerProps {
 
 export function PointerVisualizer({ step }: PointerVisualizerProps) {
   const array =
-    (step.data.array as number[] | undefined) ??
-    (step.data.nums as number[] | undefined) ??
-    [];
+    asNumberArray(step.data.array).length > 0
+      ? asNumberArray(step.data.array)
+      : asNumberArray(step.data.nums);
 
   return (
     <div className="flex flex-col items-center gap-2">
