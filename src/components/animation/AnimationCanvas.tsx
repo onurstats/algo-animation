@@ -1,6 +1,6 @@
 "use client";
 
-import { useAnimationStore } from "@/stores/animationStore";
+import { useAnimation } from "@/hooks/useAnimation";
 import { useResponsiveCanvas } from "@/hooks/useResponsiveCanvas";
 import type { DataStructureType } from "@/lib/types";
 import { visualizerRegistry } from "@/components/visualizers";
@@ -11,9 +11,7 @@ interface AnimationCanvasProps {
 
 export function AnimationCanvas({ dataStructure }: AnimationCanvasProps) {
   const { containerRef, dimensions } = useResponsiveCanvas();
-  const currentStepIndex = useAnimationStore((s) => s.currentStepIndex);
-  const steps = useAnimationStore((s) => s.steps);
-  const currentStep = steps[currentStepIndex] ?? null;
+  const { currentStep } = useAnimation();
 
   const Visualizer = visualizerRegistry[dataStructure];
 

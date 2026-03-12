@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { codeToTokens, type ThemedToken } from "shiki";
-import { useAnimationStore } from "@/stores/animationStore";
+import { useAnimation } from "@/hooks/useAnimation";
 import { cn } from "@/lib/utils/cn";
 
 interface CodePanelProps {
@@ -11,9 +11,7 @@ interface CodePanelProps {
 }
 
 export function CodePanel({ code, language = "javascript" }: CodePanelProps) {
-  const currentStepIndex = useAnimationStore((s) => s.currentStepIndex);
-  const steps = useAnimationStore((s) => s.steps);
-  const currentStep = steps[currentStepIndex] ?? null;
+  const { currentStep } = useAnimation();
   const activeLine = currentStep?.codeLineNumber ?? -1;
 
   const [tokenLines, setTokenLines] = useState<ThemedToken[][] | null>(null);
