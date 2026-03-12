@@ -1,9 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { codeToTokens, type ThemedToken } from "shiki";
-import { useAnimationStore } from "@/stores/animationStore";
+import { codeToTokens, type ThemedToken, type BundledLanguage } from "shiki";
+import { useAnimation } from "@/hooks/useAnimation";
 import { cn } from "@/lib/utils/cn";
+
+const shikiLanguageMap: Record<string, BundledLanguage> = {
+  javascript: "javascript",
+  python: "python",
+  java: "java",
+  cpp: "cpp",
+  typescript: "typescript",
+};
+
+function toShikiLang(lang: string): BundledLanguage {
+  return shikiLanguageMap[lang] ?? "javascript";
+}
 
 interface CodePanelProps {
   code: string;
@@ -11,16 +23,14 @@ interface CodePanelProps {
 }
 
 export function CodePanel({ code, language = "javascript" }: CodePanelProps) {
-  const currentStepIndex = useAnimationStore((s) => s.currentStepIndex);
-  const steps = useAnimationStore((s) => s.steps);
-  const currentStep = steps[currentStepIndex] ?? null;
+  const { currentStep } = useAnimation();
   const activeLine = currentStep?.codeLineNumber ?? -1;
 
   const [tokenLines, setTokenLines] = useState<ThemedToken[][] | null>(null);
 
   useEffect(() => {
     codeToTokens(code, {
-      lang: language as "javascript",
+      lang: toShikiLang(language),
       theme: "github-dark-default",
     }).then((result) => setTokenLines(result.tokens));
   }, [code, language]);

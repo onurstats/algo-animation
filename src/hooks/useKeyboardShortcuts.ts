@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect } from "react";
-import { useAnimationStore } from "@/stores/animationStore";
+import { useAnimation } from "@/hooks/useAnimation";
 
 export function useKeyboardShortcuts() {
   const { togglePlayPause, stepForward, stepBackward, reset, setSpeed } =
-    useAnimationStore();
+    useAnimation();
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {

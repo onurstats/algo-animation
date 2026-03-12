@@ -1,14 +1,9 @@
 "use client";
 
-import { useAnimationStore } from "@/stores/animationStore";
+import { useAnimation } from "@/hooks/useAnimation";
 
 export function StepIndicator() {
-  const currentStepIndex = useAnimationStore((s) => s.currentStepIndex);
-  const steps = useAnimationStore((s) => s.steps);
-  const goToStep = useAnimationStore((s) => s.goToStep);
-
-  const totalSteps = steps.length;
-  const progress = totalSteps > 1 ? currentStepIndex / (totalSteps - 1) : 0;
+  const { totalSteps, progress, goToStep } = useAnimation();
 
   return (
     <div className="flex items-center gap-3">

@@ -1,16 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
-import type { AnimationStep, HighlightColor } from "@/lib/types";
-
-const colorMap: Record<HighlightColor, string> = {
-  current: "text-blue-400",
-  secondary: "text-purple-400",
-  success: "text-green-400",
-  removed: "text-red-400",
-  comparing: "text-yellow-400",
-  processed: "text-gray-400",
-};
+import type { AnimationStep } from "@/lib/types";
+import { highlightTextMap, highlightClassMap } from "@/lib/constants/colors";
+import { asNumberArray } from "@/lib/utils/stepDataGuards";
 
 interface PointerVisualizerProps {
   step: AnimationStep;
@@ -20,9 +13,9 @@ interface PointerVisualizerProps {
 
 export function PointerVisualizer({ step }: PointerVisualizerProps) {
   const array =
-    (step.data.array as number[] | undefined) ??
-    (step.data.nums as number[] | undefined) ??
-    [];
+    asNumberArray(step.data.array).length > 0
+      ? asNumberArray(step.data.array)
+      : asNumberArray(step.data.nums);
 
   return (
     <div className="flex flex-col items-center gap-2">
@@ -36,7 +29,7 @@ export function PointerVisualizer({ step }: PointerVisualizerProps) {
                 <motion.div
                   initial={{ opacity: 0, y: -8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className={`flex flex-col items-center ${colorMap[pointer.color]}`}
+                  className={`flex flex-col items-center ${highlightTextMap[pointer.color]}`}
                 >
                   <span className="text-xs font-bold">{pointer.label}</span>
                   <svg className="h-3 w-3" viewBox="0 0 12 12" fill="currentColor">
@@ -54,14 +47,7 @@ export function PointerVisualizer({ step }: PointerVisualizerProps) {
         {array.map((value, index) => {
           const highlight = step.highlights.find((h) => h.index === index);
           const baseColor = highlight
-            ? {
-                current: "border-blue-500 bg-blue-500/20 text-blue-300",
-                secondary: "border-purple-500 bg-purple-500/20 text-purple-300",
-                success: "border-green-500 bg-green-500/20 text-green-300",
-                removed: "border-red-500 bg-red-500/20 text-red-300",
-                comparing: "border-yellow-500 bg-yellow-500/20 text-yellow-300",
-                processed: "border-gray-500 bg-gray-500/20 text-gray-400",
-              }[highlight.color]
+            ? highlightClassMap[highlight.color]
             : "border-border bg-elevated text-foreground";
 
           return (

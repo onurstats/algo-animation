@@ -1,12 +1,10 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useAnimationStore } from "@/stores/animationStore";
+import { useAnimation } from "@/hooks/useAnimation";
 
 export function StepDescription() {
-  const currentStepIndex = useAnimationStore((s) => s.currentStepIndex);
-  const steps = useAnimationStore((s) => s.steps);
-  const currentStep = steps[currentStepIndex] ?? null;
+  const { currentStep } = useAnimation();
 
   return (
     <div className="flex min-h-[3rem] items-center rounded-lg bg-surface px-4 py-2">

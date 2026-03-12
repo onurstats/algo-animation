@@ -1,16 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
-import type { AnimationStep, HighlightColor } from "@/lib/types";
-
-const colorMap: Record<HighlightColor, string> = {
-  current: "border-blue-500 bg-blue-500/20 text-blue-300",
-  secondary: "border-purple-500 bg-purple-500/20 text-purple-300",
-  success: "border-green-500 bg-green-500/20 text-green-300",
-  removed: "border-red-500 bg-red-500/20 text-red-300",
-  comparing: "border-yellow-500 bg-yellow-500/20 text-yellow-300",
-  processed: "border-gray-500 bg-gray-500/20 text-gray-400",
-};
+import type { AnimationStep } from "@/lib/types";
+import { highlightClassMap } from "@/lib/constants/colors";
+import { asNestedNumberArray } from "@/lib/utils/stepDataGuards";
 
 interface MatrixVisualizerProps {
   step: AnimationStep;
@@ -19,7 +12,7 @@ interface MatrixVisualizerProps {
 }
 
 export function MatrixVisualizer({ step }: MatrixVisualizerProps) {
-  const matrix = (step.data.matrix as number[][]) ?? [];
+  const matrix = asNestedNumberArray(step.data.matrix);
   const highlightMap = new Map(step.highlights.map((h) => [h.index, h]));
 
   return (
@@ -30,7 +23,7 @@ export function MatrixVisualizer({ step }: MatrixVisualizerProps) {
             const flatIndex = rowIdx * row.length + colIdx;
             const highlight = highlightMap.get(flatIndex);
             const colorClass = highlight
-              ? colorMap[highlight.color]
+              ? highlightClassMap[highlight.color]
               : "border-border bg-elevated text-foreground";
 
             return (

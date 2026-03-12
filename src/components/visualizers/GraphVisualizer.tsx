@@ -1,25 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import type { AnimationStep, HighlightColor } from "@/lib/types";
-
-const strokeColors: Record<HighlightColor, string> = {
-  current: "#3b82f6",
-  secondary: "#8b5cf6",
-  success: "#22c55e",
-  removed: "#ef4444",
-  comparing: "#eab308",
-  processed: "#6b7280",
-};
-
-const fillColors: Record<HighlightColor, string> = {
-  current: "#3b82f633",
-  secondary: "#8b5cf633",
-  success: "#22c55e33",
-  removed: "#ef444433",
-  comparing: "#eab30833",
-  processed: "#6b728033",
-};
+import type { AnimationStep } from "@/lib/types";
+import { highlightStrokeColors, highlightFillColors } from "@/lib/constants/colors";
 
 interface GraphNode {
   id: number;
@@ -78,8 +61,8 @@ export function GraphVisualizer({ step, width, height }: GraphVisualizerProps) {
               cx={node.x}
               cy={node.y}
               r={22}
-              fill={highlight ? fillColors[highlight.color] : "#2a2d3e"}
-              stroke={highlight ? strokeColors[highlight.color] : "#3b3f54"}
+              fill={highlight ? highlightFillColors[highlight.color] : "#2a2d3e"}
+              stroke={highlight ? highlightStrokeColors[highlight.color] : "#3b3f54"}
               strokeWidth={2}
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}

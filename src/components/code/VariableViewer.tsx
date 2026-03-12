@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useAnimationStore } from "@/stores/animationStore";
+import { useAnimation } from "@/hooks/useAnimation";
 import { cn } from "@/lib/utils/cn";
 
 interface Variable {
@@ -38,9 +38,7 @@ function getTypeLabel(value: unknown): string {
 }
 
 export function VariableViewer() {
-  const currentStepIndex = useAnimationStore((s) => s.currentStepIndex);
-  const steps = useAnimationStore((s) => s.steps);
-  const currentStep = steps[currentStepIndex] ?? null;
+  const { currentStep, currentStepIndex, steps } = useAnimation();
   const prevStep = currentStepIndex > 0 ? steps[currentStepIndex - 1] : null;
 
   if (!currentStep) {
