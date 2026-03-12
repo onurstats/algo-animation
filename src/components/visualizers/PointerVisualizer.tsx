@@ -19,7 +19,10 @@ interface PointerVisualizerProps {
 }
 
 export function PointerVisualizer({ step }: PointerVisualizerProps) {
-  const array = (step.data.array as number[]) ?? [];
+  const array =
+    (step.data.array as number[] | undefined) ??
+    (step.data.nums as number[] | undefined) ??
+    [];
 
   return (
     <div className="flex flex-col items-center gap-2">

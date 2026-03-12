@@ -2,18 +2,10 @@ import type { AnimationStep } from "@/lib/types";
 import { createStep } from "@/lib/engine/stepGenerator";
 
 /**
- * Convert a level-order array into an array-based binary tree representation.
- * Index 0 is root; for node at index i, left child = 2i+1, right child = 2i+2.
+ * Swap entire subtrees rooted at leftIdx and rightIdx in a level-order array.
+ * Returns a new array with the subtrees swapped.
  */
-function toLevelOrder(nodes: (number | null)[]): (number | null)[] {
-  return [...nodes];
-}
-
-/**
- * Swap children of a node at the given index in a level-order array.
- * Swaps the entire subtrees rooted at the left and right children.
- */
-function swapChildren(
+function swapSubtrees(
   nodes: (number | null)[],
   parentIndex: number,
 ): (number | null)[] {
@@ -21,39 +13,35 @@ function swapChildren(
   const leftIdx = 2 * parentIndex + 1;
   const rightIdx = 2 * parentIndex + 2;
 
-  // Collect all indices in the left and right subtrees
+  // Collect all indices in a subtree via BFS
   function collectSubtree(rootIdx: number): number[] {
     const indices: number[] = [];
     const queue = [rootIdx];
     while (queue.length > 0) {
       const idx = queue.shift()!;
-      if (idx >= nodes.length) break;
+      if (idx >= result.length) continue;
       indices.push(idx);
       const l = 2 * idx + 1;
       const r = 2 * idx + 2;
-      if (l < nodes.length) queue.push(l);
-      if (r < nodes.length) queue.push(r);
+      if (l < result.length) queue.push(l);
+      if (r < result.length) queue.push(r);
     }
     return indices;
   }
 
-  const leftSubtreeIndices = collectSubtree(leftIdx);
-  const rightSubtreeIndices = collectSubtree(rightIdx);
+  const leftIndices = collectSubtree(leftIdx);
+  const rightIndices = collectSubtree(rightIdx);
 
-  // Build maps of relative positions to values
-  const leftValues = leftSubtreeIndices.map((i) => nodes[i] ?? null);
-  const rightValues = rightSubtreeIndices.map((i) => nodes[i] ?? null);
+  const leftValues = leftIndices.map((i) => nodes[i] ?? null);
+  const rightValues = rightIndices.map((i) => nodes[i] ?? null);
 
-  // Place right subtree values into left subtree positions and vice versa
-  const maxLen = Math.max(leftSubtreeIndices.length, rightSubtreeIndices.length);
+  const maxLen = Math.max(leftIndices.length, rightIndices.length);
   for (let i = 0; i < maxLen; i++) {
-    if (i < leftSubtreeIndices.length) {
-      result[leftSubtreeIndices[i]] =
-        i < rightValues.length ? rightValues[i] : null;
+    if (i < leftIndices.length) {
+      result[leftIndices[i]] = i < rightValues.length ? rightValues[i] : null;
     }
-    if (i < rightSubtreeIndices.length) {
-      result[rightSubtreeIndices[i]] =
-        i < leftValues.length ? leftValues[i] : null;
+    if (i < rightIndices.length) {
+      result[rightIndices[i]] = i < leftValues.length ? leftValues[i] : null;
     }
   }
 
@@ -61,9 +49,27 @@ function swapChildren(
 }
 
 /**
- * Generate animation steps for inverting a binary tree.
- * Uses BFS to visit each node and swap its children, producing
- * a step-by-step visualization of the inversion process.
+ * Format a node value for display: "node(4)" or "null".
+ */
+function fmt(val: number | null | undefined): string {
+  return val === null || val === undefined ? "null" : `node(${val})`;
+}
+
+/**
+ * Generate debugger-style line-by-line animation steps for inverting a binary tree.
+ *
+ * Traces the recursive invertTree function using post-order DFS.
+ * Every line of code execution produces exactly one animation step.
+ *
+ * Solution code (line numbers for codeLineNumber):
+ *   Line 1: function invertTree(root) {
+ *   Line 2:   if (root === null) return null;
+ *   Line 3:   const left = invertTree(root.left);
+ *   Line 4:   const right = invertTree(root.right);
+ *   Line 5:   root.left = right;
+ *   Line 6:   root.right = left;
+ *   Line 7:   return root;
+ *   Line 8: }
  */
 export function generateSteps(
   input: Record<string, unknown>,
@@ -84,139 +90,248 @@ export function generateSteps(
     return steps;
   }
 
-  let nodes = toLevelOrder(rootArray);
+  // Working copy of the level-order array — mutated as swaps happen
+  let nodes = [...rootArray];
 
-  // Step: Introduction
-  steps.push(
-    createStep(id++, {
-      action: "highlight",
-      description: `Start: binary tree with nodes [${nodes.filter((n) => n !== null).join(", ")}]. We will invert the tree by swapping left and right children at every node.`,
-      codeLineNumber: 1,
-      data: { nodes: [...nodes] },
-    }),
-  );
+  /**
+   * Recursively trace invertTree for the node at `nodeIndex` in the level-order array.
+   * `depth` tracks the current recursion depth for the call stack display.
+   * `callStack` is the current stack of node values being processed.
+   */
+  function trace(
+    nodeIndex: number,
+    depth: number,
+    callStack: string[],
+  ): void {
+    const nodeVal =
+      nodeIndex < nodes.length ? nodes[nodeIndex] : null;
+    const isNull = nodeVal === null || nodeVal === undefined;
 
-  // Single node — nothing to swap
-  if (rootArray.length === 1) {
-    steps.push(
-      createStep(id++, {
-        action: "complete",
-        description: `Tree has only one node (${rootArray[0]}). No children to swap. The tree is already inverted.`,
-        codeLineNumber: 7,
-        data: { nodes: [...nodes] },
-      }),
-    );
-    return steps;
-  }
+    const indent = "  ".repeat(depth);
+    const stackLabel = callStack.join(" → ");
 
-  // BFS traversal to visit each node and swap its children
-  const queue: number[] = [0];
-
-  while (queue.length > 0) {
-    const nodeIndex = queue.shift()!;
-    const nodeVal = nodes[nodeIndex];
-
-    if (nodeVal === null || nodeVal === undefined) continue;
-
-    const leftIdx = 2 * nodeIndex + 1;
-    const rightIdx = 2 * nodeIndex + 2;
-    const leftVal =
-      leftIdx < nodes.length ? nodes[leftIdx] : null;
-    const rightVal =
-      rightIdx < nodes.length ? nodes[rightIdx] : null;
-
-    const hasLeft = leftVal !== null && leftVal !== undefined;
-    const hasRight = rightVal !== null && rightVal !== undefined;
-
-    // Step: Visiting node
+    // --- Line 1: function invertTree(root) { ---
     steps.push(
       createStep(id++, {
         action: "traverse",
-        description: `Visit node ${nodeVal}. Left child: ${hasLeft ? leftVal : "none"}, Right child: ${hasRight ? rightVal : "none"}.`,
-        highlights: [{ index: nodeIndex, color: "current" }],
-        codeLineNumber: 2,
-        data: { nodes: [...nodes], currentNode: nodeIndex },
+        description: `${indent}invertTree(${fmt(nodeVal)}) called`,
+        codeLineNumber: 1,
+        highlights: isNull
+          ? []
+          : [{ index: nodeIndex, color: "current" as const }],
+        data: { nodes: [...nodes], currentNode: isNull ? null : nodeIndex },
+        auxiliaryData: {
+          depth,
+          callStack: [...callStack],
+          stackLabel: `Call stack: ${stackLabel}`,
+        },
       }),
     );
 
-    if (!hasLeft && !hasRight) {
-      // Leaf node — no children to swap
+    // --- Line 2: if (root === null) return null; ---
+    if (isNull) {
       steps.push(
         createStep(id++, {
           action: "highlight",
-          description: `Node ${nodeVal} is a leaf node. No children to swap.`,
-          highlights: [{ index: nodeIndex, color: "processed" }],
+          description: `${indent}root === null → true, return null`,
           codeLineNumber: 2,
-          data: { nodes: [...nodes], currentNode: nodeIndex },
+          highlights: [],
+          data: { nodes: [...nodes], currentNode: null },
+          auxiliaryData: {
+            depth,
+            callStack: [...callStack],
+            stackLabel: `Call stack: ${stackLabel}`,
+          },
         }),
       );
-    } else {
-      // Step: Highlight children before swap
-      const childHighlights = [];
-      if (hasLeft) {
-        childHighlights.push({ index: leftIdx, color: "comparing" as const });
-      }
-      if (hasRight) {
-        childHighlights.push({ index: rightIdx, color: "comparing" as const });
-      }
-
-      steps.push(
-        createStep(id++, {
-          action: "compare",
-          description: `Preparing to swap children of node ${nodeVal}: left (${hasLeft ? leftVal : "none"}) and right (${hasRight ? rightVal : "none"}).`,
-          highlights: [
-            { index: nodeIndex, color: "current" },
-            ...childHighlights,
-          ],
-          codeLineNumber: 3,
-          data: { nodes: [...nodes], currentNode: nodeIndex },
-        }),
-      );
-
-      // Perform the swap
-      nodes = swapChildren(nodes, nodeIndex);
-
-      const newLeftVal =
-        leftIdx < nodes.length ? nodes[leftIdx] : null;
-      const newRightVal =
-        rightIdx < nodes.length ? nodes[rightIdx] : null;
-
-      // Step: After swap
-      steps.push(
-        createStep(id++, {
-          action: "swap",
-          description: `Swapped children of node ${nodeVal}. Now left: ${newLeftVal ?? "none"}, right: ${newRightVal ?? "none"}.`,
-          highlights: [
-            { index: nodeIndex, color: "success" },
-            ...(newLeftVal !== null && newLeftVal !== undefined
-              ? [{ index: leftIdx, color: "success" as const }]
-              : []),
-            ...(newRightVal !== null && newRightVal !== undefined
-              ? [{ index: rightIdx, color: "success" as const }]
-              : []),
-          ],
-          codeLineNumber: 5,
-          data: { nodes: [...nodes], currentNode: nodeIndex },
-        }),
-      );
+      return;
     }
 
-    // Enqueue children for further processing
-    if (leftIdx < nodes.length && nodes[leftIdx] !== null && nodes[leftIdx] !== undefined) {
-      queue.push(leftIdx);
-    }
-    if (rightIdx < nodes.length && nodes[rightIdx] !== null && nodes[rightIdx] !== undefined) {
-      queue.push(rightIdx);
-    }
+    // Node exists — null check is false
+    steps.push(
+      createStep(id++, {
+        action: "highlight",
+        description: `${indent}root === null → false (root = ${fmt(nodeVal)})`,
+        codeLineNumber: 2,
+        highlights: [{ index: nodeIndex, color: "current" as const }],
+        data: { nodes: [...nodes], currentNode: nodeIndex },
+        auxiliaryData: {
+          depth,
+          callStack: [...callStack],
+          stackLabel: `Call stack: ${stackLabel}`,
+        },
+      }),
+    );
+
+    const leftIdx = 2 * nodeIndex + 1;
+    const rightIdx = 2 * nodeIndex + 2;
+    const leftVal = leftIdx < nodes.length ? nodes[leftIdx] : null;
+    const rightVal = rightIdx < nodes.length ? nodes[rightIdx] : null;
+
+    // --- Line 3: const left = invertTree(root.left); ---
+    steps.push(
+      createStep(id++, {
+        action: "traverse",
+        description: `${indent}const left = invertTree(${fmt(nodeVal)}.left) → invertTree(${fmt(leftVal)})`,
+        codeLineNumber: 3,
+        highlights: [
+          { index: nodeIndex, color: "current" as const },
+          ...(leftVal !== null && leftVal !== undefined
+            ? [{ index: leftIdx, color: "comparing" as const }]
+            : []),
+        ],
+        data: { nodes: [...nodes], currentNode: nodeIndex },
+        auxiliaryData: {
+          depth,
+          callStack: [...callStack],
+          stackLabel: `Call stack: ${stackLabel}`,
+        },
+      }),
+    );
+
+    // Recurse into left child
+    trace(leftIdx, depth + 1, [...callStack, `L:${fmt(leftVal)}`]);
+
+    // After left recursion returns, capture the (possibly swapped) left subtree result
+    const leftResultVal = leftIdx < nodes.length ? nodes[leftIdx] : null;
+
+    // --- Line 4: const right = invertTree(root.right); ---
+    // Re-read rightVal since tree may have been modified by left recursion (shouldn't affect right subtree, but be safe)
+    const currentRightVal = rightIdx < nodes.length ? nodes[rightIdx] : null;
+
+    steps.push(
+      createStep(id++, {
+        action: "traverse",
+        description: `${indent}const right = invertTree(${fmt(nodeVal)}.right) → invertTree(${fmt(currentRightVal)})`,
+        codeLineNumber: 4,
+        highlights: [
+          { index: nodeIndex, color: "current" as const },
+          ...(currentRightVal !== null && currentRightVal !== undefined
+            ? [{ index: rightIdx, color: "comparing" as const }]
+            : []),
+        ],
+        data: { nodes: [...nodes], currentNode: nodeIndex },
+        auxiliaryData: {
+          depth,
+          callStack: [...callStack],
+          stackLabel: `Call stack: ${stackLabel}`,
+        },
+      }),
+    );
+
+    // Recurse into right child
+    trace(rightIdx, depth + 1, [...callStack, `R:${fmt(currentRightVal)}`]);
+
+    // After right recursion returns, capture the result
+    const rightResultVal = rightIdx < nodes.length ? nodes[rightIdx] : null;
+
+    // --- Line 5: root.left = right; ---
+    // Before the swap, read current children
+    const preSwapLeft = leftIdx < nodes.length ? nodes[leftIdx] : null;
+    const preSwapRight = rightIdx < nodes.length ? nodes[rightIdx] : null;
+
+    steps.push(
+      createStep(id++, {
+        action: "swap",
+        description: `${indent}${fmt(nodeVal)}.left = right → ${fmt(nodeVal)}.left = ${fmt(preSwapRight)}`,
+        codeLineNumber: 5,
+        highlights: [
+          { index: nodeIndex, color: "current" as const },
+          ...(preSwapRight !== null && preSwapRight !== undefined
+            ? [{ index: rightIdx, color: "comparing" as const }]
+            : []),
+          ...(preSwapLeft !== null && preSwapLeft !== undefined
+            ? [{ index: leftIdx, color: "secondary" as const }]
+            : []),
+        ],
+        data: { nodes: [...nodes], currentNode: nodeIndex },
+        auxiliaryData: {
+          depth,
+          callStack: [...callStack],
+          stackLabel: `Call stack: ${stackLabel}`,
+          swap: {
+            leftBefore: preSwapLeft,
+            rightBefore: preSwapRight,
+          },
+        },
+      }),
+    );
+
+    // --- Line 6: root.right = left; ---
+    steps.push(
+      createStep(id++, {
+        action: "swap",
+        description: `${indent}${fmt(nodeVal)}.right = left → ${fmt(nodeVal)}.right = ${fmt(preSwapLeft)}`,
+        codeLineNumber: 6,
+        highlights: [
+          { index: nodeIndex, color: "current" as const },
+          ...(preSwapLeft !== null && preSwapLeft !== undefined
+            ? [{ index: leftIdx, color: "comparing" as const }]
+            : []),
+          ...(preSwapRight !== null && preSwapRight !== undefined
+            ? [{ index: rightIdx, color: "secondary" as const }]
+            : []),
+        ],
+        data: { nodes: [...nodes], currentNode: nodeIndex },
+        auxiliaryData: {
+          depth,
+          callStack: [...callStack],
+          stackLabel: `Call stack: ${stackLabel}`,
+          swap: {
+            leftBefore: preSwapLeft,
+            rightBefore: preSwapRight,
+          },
+        },
+      }),
+    );
+
+    // Perform the actual swap in the level-order array
+    nodes = swapSubtrees(nodes, nodeIndex);
+
+    const postSwapLeft = leftIdx < nodes.length ? nodes[leftIdx] : null;
+    const postSwapRight = rightIdx < nodes.length ? nodes[rightIdx] : null;
+
+    // --- Line 7: return root; ---
+    steps.push(
+      createStep(id++, {
+        action: "highlight",
+        description: `${indent}return ${fmt(nodeVal)} (children now: left=${fmt(postSwapLeft)}, right=${fmt(postSwapRight)})`,
+        codeLineNumber: 7,
+        highlights: [
+          { index: nodeIndex, color: "success" as const },
+          ...(postSwapLeft !== null && postSwapLeft !== undefined
+            ? [{ index: leftIdx, color: "success" as const }]
+            : []),
+          ...(postSwapRight !== null && postSwapRight !== undefined
+            ? [{ index: rightIdx, color: "success" as const }]
+            : []),
+        ],
+        data: { nodes: [...nodes], currentNode: nodeIndex },
+        auxiliaryData: {
+          depth,
+          callStack: [...callStack],
+          stackLabel: `Call stack: ${stackLabel}`,
+        },
+      }),
+    );
   }
 
-  // Step: Complete
+  // Start the recursive trace from the root
+  const rootVal = nodes[0];
+  trace(0, 0, [`invertTree(${fmt(rootVal)})`]);
+
+  // Final completion step
   steps.push(
     createStep(id++, {
       action: "complete",
       description: `Inversion complete! The inverted tree is [${nodes.filter((n) => n !== null).join(", ")}].`,
-      codeLineNumber: 7,
+      codeLineNumber: 8,
       data: { nodes: [...nodes] },
+      auxiliaryData: {
+        depth: 0,
+        callStack: [],
+        stackLabel: "Done",
+      },
     }),
   );
 

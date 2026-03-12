@@ -1,5 +1,24 @@
-import type { AnimationStep } from "@/lib/types";
+import type { AnimationStep, Highlight, Pointer } from "@/lib/types";
 import { createStep } from "@/lib/engine/stepGenerator";
+
+/*
+ * Line reference (JavaScript solution):
+ * 1:  function search(nums, target) {
+ * 2:    let left = 0;
+ * 3:    let right = nums.length - 1;
+ * 4:    while (left <= right) {
+ * 5:      const mid = Math.floor((left + right) / 2);
+ * 6:      if (nums[mid] === target) {
+ * 7:        return mid;
+ * 8:      } else if (nums[mid] < target) {
+ * 9:        left = mid + 1;
+ * 10:     } else {
+ * 11:       right = mid - 1;
+ * 12:     }
+ * 13:   }
+ * 14:   return -1;
+ * 15: }
+ */
 
 export function generateSteps(
   input: Record<string, unknown>,
@@ -9,228 +28,286 @@ export function generateSteps(
   const steps: AnimationStep[] = [];
   let id = 0;
 
-  // Track which indices have been eliminated
   const eliminated = new Set<number>();
 
-  // Step 0: Introduction
+  function processedHighlights(): Highlight[] {
+    return Array.from(eliminated).map((idx) => ({
+      index: idx,
+      color: "processed" as const,
+    }));
+  }
+
+  function buildHighlights(
+    left: number,
+    right: number,
+    mid?: number,
+  ): Highlight[] {
+    const h: Highlight[] = processedHighlights();
+    if (mid !== undefined) {
+      if (left !== mid) h.push({ index: left, color: "secondary" });
+      if (right !== mid) h.push({ index: right, color: "secondary" });
+      h.push({ index: mid, color: "current" });
+    } else {
+      h.push({ index: left, color: "secondary" });
+      if (right >= 0 && right < nums.length) {
+        h.push({ index: right, color: "secondary" });
+      }
+    }
+    return h;
+  }
+
+  function buildPointers(
+    left: number,
+    right: number,
+    mid?: number,
+  ): Pointer[] {
+    const p: Pointer[] = [
+      { index: left, label: "L", color: "secondary" },
+    ];
+    if (mid !== undefined) {
+      p.push({ index: mid, label: "M", color: "current" });
+    }
+    if (right >= 0 && right < nums.length) {
+      p.push({ index: right, label: "R", color: "secondary" });
+    }
+    return p;
+  }
+
+  // Line 1: function search(nums, target) {
   steps.push(
     createStep(id++, {
       action: "highlight",
-      description: `Start: nums = [${nums.join(", ")}], target = ${target}. Search for ${target} using binary search.`,
+      description: `search([${nums.join(", ")}], ${target})`,
       codeLineNumber: 1,
-      data: {
-        array: nums.map((value, index) => ({
-          value,
-          index,
-        })),
-        target,
-      },
+      data: { nums: [...nums], target },
     }),
   );
 
-  // Step 1: Initialize left and right pointers
+  // Line 2: let left = 0;
   let left = 0;
-  let right = nums.length - 1;
-
   steps.push(
     createStep(id++, {
-      action: "highlight",
-      description: `Initialize pointers: left = ${left}, right = ${right}.`,
+      action: "set",
+      description: `let left = 0  →  left = 0`,
+      codeLineNumber: 2,
+      highlights: [{ index: 0, color: "secondary" }],
+      pointers: [{ index: 0, label: "L", color: "secondary" }],
+      data: { nums: [...nums], target, left },
+    }),
+  );
+
+  // Line 3: let right = nums.length - 1;
+  let right = nums.length - 1;
+  steps.push(
+    createStep(id++, {
+      action: "set",
+      description: `let right = ${nums.length} - 1  →  right = ${right}`,
+      codeLineNumber: 3,
       highlights: [
-        { index: left, color: "secondary" as const },
-        { index: right, color: "secondary" as const },
+        { index: left, color: "secondary" },
+        { index: right, color: "secondary" },
       ],
       pointers: [
-        { index: left, label: "L", color: "secondary" as const },
-        { index: right, label: "R", color: "secondary" as const },
+        { index: left, label: "L", color: "secondary" },
+        { index: right, label: "R", color: "secondary" },
       ],
-      codeLineNumber: 2,
-      data: {
-        array: nums.map((value, index) => ({
-          value,
-          index,
-        })),
-        target,
-        left,
-        right,
-      },
+      data: { nums: [...nums], target, left, right },
     }),
   );
 
   // Binary search loop
   while (left <= right) {
-    const mid = Math.floor((left + right) / 2);
-
-    // Build highlights: eliminated as processed, left/right as secondary, mid as current
-    const buildHighlights = () => {
-      const highlights: { index: number; color: "processed" | "secondary" | "current" | "success" }[] = [];
-      for (const idx of eliminated) {
-        highlights.push({ index: idx, color: "processed" as const });
-      }
-      if (left !== mid) {
-        highlights.push({ index: left, color: "secondary" as const });
-      }
-      if (right !== mid) {
-        highlights.push({ index: right, color: "secondary" as const });
-      }
-      highlights.push({ index: mid, color: "current" as const });
-      return highlights;
-    };
-
-    const buildPointers = () => [
-      { index: left, label: "L", color: "secondary" as const },
-      { index: mid, label: "M", color: "current" as const },
-      { index: right, label: "R", color: "secondary" as const },
-    ];
-
-    // Calculate mid
+    // Line 4: while (left <= right) — condition true
     steps.push(
       createStep(id++, {
         action: "compare",
-        description: `left = ${left}, right = ${right}. mid = floor((${left} + ${right}) / 2) = ${mid}. nums[${mid}] = ${nums[mid]}.`,
-        highlights: buildHighlights(),
-        pointers: buildPointers(),
+        description: `while (left <= right)  →  ${left} <= ${right}  →  true`,
+        codeLineNumber: 4,
+        highlights: buildHighlights(left, right),
+        pointers: buildPointers(left, right),
+        data: { nums: [...nums], target, left, right },
+      }),
+    );
+
+    // Line 5: const mid = Math.floor((left + right) / 2);
+    const mid = Math.floor((left + right) / 2);
+    steps.push(
+      createStep(id++, {
+        action: "set",
+        description: `const mid = Math.floor((${left} + ${right}) / 2)  →  mid = ${mid}`,
         codeLineNumber: 5,
-        data: {
-          array: nums.map((value, index) => ({
-            value,
-            index,
-          })),
-          target,
-          left,
-          right,
-          mid,
-        },
+        highlights: buildHighlights(left, right, mid),
+        pointers: buildPointers(left, right, mid),
+        data: { nums: [...nums], target, left, right, mid },
       }),
     );
 
     if (nums[mid] === target) {
-      // Found target
-      const finalHighlights: { index: number; color: "processed" | "success" }[] = [];
-      for (const idx of eliminated) {
-        finalHighlights.push({ index: idx, color: "processed" as const });
-      }
-      finalHighlights.push({ index: mid, color: "success" as const });
+      // Line 6: if (nums[mid] === target) — true
+      steps.push(
+        createStep(id++, {
+          action: "compare",
+          description: `nums[${mid}] === ${target}  →  ${nums[mid]} === ${target}  →  true`,
+          codeLineNumber: 6,
+          highlights: [
+            ...processedHighlights(),
+            { index: mid, color: "success" },
+          ],
+          pointers: buildPointers(left, right, mid),
+          data: { nums: [...nums], target, left, right, mid },
+        }),
+      );
 
+      // Line 7: return mid;
       steps.push(
         createStep(id++, {
           action: "found",
-          description: `nums[${mid}] = ${nums[mid]} equals target ${target}. Found! Return index ${mid}.`,
-          highlights: finalHighlights,
-          pointers: [
-            { index: mid, label: "found", color: "success" as const },
-          ],
+          description: `return ${mid}  →  target ${target} found at index ${mid}`,
           codeLineNumber: 7,
-          data: {
-            array: nums.map((value, index) => ({
-              value,
-              index,
-            })),
-            target,
-            left,
-            right,
-            mid,
-            result: mid,
-          },
+          highlights: [
+            ...processedHighlights(),
+            { index: mid, color: "success" },
+          ],
+          pointers: [{ index: mid, label: "found", color: "success" }],
+          data: { nums: [...nums], target, left, right, mid, result: mid },
         }),
       );
 
       return steps;
     } else if (nums[mid] < target) {
+      // Line 6: if (nums[mid] === target) — false
+      steps.push(
+        createStep(id++, {
+          action: "compare",
+          description: `nums[${mid}] === ${target}  →  ${nums[mid]} === ${target}  →  false`,
+          codeLineNumber: 6,
+          highlights: buildHighlights(left, right, mid),
+          pointers: buildPointers(left, right, mid),
+          data: { nums: [...nums], target, left, right, mid },
+        }),
+      );
+
+      // Line 8: else if (nums[mid] < target) — true
+      steps.push(
+        createStep(id++, {
+          action: "compare",
+          description: `nums[${mid}] < ${target}  →  ${nums[mid]} < ${target}  →  true`,
+          codeLineNumber: 8,
+          highlights: buildHighlights(left, right, mid),
+          pointers: buildPointers(left, right, mid),
+          data: { nums: [...nums], target, left, right, mid },
+        }),
+      );
+
       // Eliminate left half including mid
       for (let i = left; i <= mid; i++) {
         eliminated.add(i);
       }
-      left = mid + 1;
 
+      // Line 9: left = mid + 1;
+      left = mid + 1;
       steps.push(
         createStep(id++, {
-          action: "compare",
-          description: `nums[${mid}] = ${nums[mid]} < ${target}. Target is in the right half. Set left = ${left}.`,
-          highlights: [
-            ...Array.from(eliminated).map((idx) => ({
-              index: idx,
-              color: "processed" as const,
-            })),
-            { index: left, color: "secondary" as const },
-            { index: right, color: "secondary" as const },
-          ],
-          pointers: [
-            { index: left, label: "L", color: "secondary" as const },
-            { index: right, label: "R", color: "secondary" as const },
-          ],
+          action: "move-pointer",
+          description: `left = ${mid} + 1  →  left = ${left}`,
           codeLineNumber: 9,
-          data: {
-            array: nums.map((value, index) => ({
-              value,
-              index,
-            })),
-            target,
-            left,
-            right,
-          },
+          highlights: [
+            ...processedHighlights(),
+            ...(left < nums.length
+              ? [{ index: left, color: "secondary" as const }]
+              : []),
+            ...(right < nums.length
+              ? [{ index: right, color: "secondary" as const }]
+              : []),
+          ],
+          pointers: buildPointers(left, right),
+          data: { nums: [...nums], target, left, right },
         }),
       );
     } else {
+      // Line 6: if (nums[mid] === target) — false
+      steps.push(
+        createStep(id++, {
+          action: "compare",
+          description: `nums[${mid}] === ${target}  →  ${nums[mid]} === ${target}  →  false`,
+          codeLineNumber: 6,
+          highlights: buildHighlights(left, right, mid),
+          pointers: buildPointers(left, right, mid),
+          data: { nums: [...nums], target, left, right, mid },
+        }),
+      );
+
+      // Line 8: else if (nums[mid] < target) — false
+      steps.push(
+        createStep(id++, {
+          action: "compare",
+          description: `nums[${mid}] < ${target}  →  ${nums[mid]} < ${target}  →  false`,
+          codeLineNumber: 8,
+          highlights: buildHighlights(left, right, mid),
+          pointers: buildPointers(left, right, mid),
+          data: { nums: [...nums], target, left, right, mid },
+        }),
+      );
+
+      // Line 10: else {  (implicit — nums[mid] > target)
+      steps.push(
+        createStep(id++, {
+          action: "highlight",
+          description: `else: nums[${mid}] > ${target}  →  ${nums[mid]} > ${target}  →  true`,
+          codeLineNumber: 10,
+          highlights: buildHighlights(left, right, mid),
+          pointers: buildPointers(left, right, mid),
+          data: { nums: [...nums], target, left, right, mid },
+        }),
+      );
+
       // Eliminate right half including mid
       for (let i = mid; i <= right; i++) {
         eliminated.add(i);
       }
-      right = mid - 1;
 
+      // Line 11: right = mid - 1;
+      right = mid - 1;
       steps.push(
         createStep(id++, {
-          action: "compare",
-          description: `nums[${mid}] = ${nums[mid]} > ${target}. Target is in the left half. Set right = ${right}.`,
+          action: "move-pointer",
+          description: `right = ${mid} - 1  →  right = ${right}`,
+          codeLineNumber: 11,
           highlights: [
-            ...Array.from(eliminated).map((idx) => ({
-              index: idx,
-              color: "processed" as const,
-            })),
-            { index: left, color: "secondary" as const },
-            ...(right >= left
+            ...processedHighlights(),
+            ...(left < nums.length
+              ? [{ index: left, color: "secondary" as const }]
+              : []),
+            ...(right >= 0
               ? [{ index: right, color: "secondary" as const }]
               : []),
           ],
-          pointers: [
-            { index: left, label: "L", color: "secondary" as const },
-            ...(right >= left
-              ? [{ index: right, label: "R", color: "secondary" as const }]
-              : []),
-          ],
-          codeLineNumber: 11,
-          data: {
-            array: nums.map((value, index) => ({
-              value,
-              index,
-            })),
-            target,
-            left,
-            right,
-          },
+          pointers: buildPointers(left, right),
+          data: { nums: [...nums], target, left, right },
         }),
       );
     }
   }
 
-  // Target not found
+  // Line 4: while (left <= right) — condition false (loop ends)
+  steps.push(
+    createStep(id++, {
+      action: "compare",
+      description: `while (left <= right)  →  ${left} <= ${right}  →  false, loop ended`,
+      codeLineNumber: 4,
+      highlights: processedHighlights(),
+      data: { nums: [...nums], target, left, right },
+    }),
+  );
+
+  // Line 14: return -1;
   steps.push(
     createStep(id++, {
       action: "not-found",
-      description: `left (${left}) > right (${right}). Search space exhausted. Target ${target} not found. Return -1.`,
-      highlights: Array.from(eliminated).map((idx) => ({
-        index: idx,
-        color: "processed" as const,
-      })),
+      description: `return -1  →  target ${target} not found`,
       codeLineNumber: 14,
-      data: {
-        array: nums.map((value, index) => ({
-          value,
-          index,
-        })),
-        target,
-        result: -1,
-      },
+      highlights: processedHighlights(),
+      data: { nums: [...nums], target, result: -1 },
     }),
   );
 

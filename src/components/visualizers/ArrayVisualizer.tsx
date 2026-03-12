@@ -19,7 +19,10 @@ interface ArrayVisualizerProps {
 }
 
 export function ArrayVisualizer({ step }: ArrayVisualizerProps) {
-  const array = (step.data.array as number[]) ?? [];
+  const array =
+    (step.data.array as number[] | undefined) ??
+    (step.data.nums as number[] | undefined) ??
+    [];
   const highlightMap = new Map(
     step.highlights.map((h) => [h.index, h]),
   );
