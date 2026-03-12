@@ -1,20 +1,14 @@
 import Link from "next/link";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { Card } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
+import { ProblemCard } from "@/components/problem/ProblemCard";
 import { Button } from "@/components/ui/Button";
-
-const featuredProblems = [
-  { title: "Two Sum", difficulty: "Easy" as const, slug: "two-sum", tags: ["Array", "Hash Map"] },
-  { title: "Valid Parentheses", difficulty: "Easy" as const, slug: "valid-parentheses", tags: ["String", "Stack"] },
-  { title: "Binary Search", difficulty: "Easy" as const, slug: "binary-search", tags: ["Array", "Binary Search"] },
-  { title: "Reverse Linked List", difficulty: "Easy" as const, slug: "reverse-linked-list", tags: ["Linked List"] },
-  { title: "Invert Binary Tree", difficulty: "Easy" as const, slug: "invert-binary-tree", tags: ["Tree", "DFS"] },
-  { title: "Maximum Subarray", difficulty: "Medium" as const, slug: "maximum-subarray", tags: ["Array", "DP"] },
-];
+import "@/lib/problems/register";
+import { getAllProblems } from "@/lib/problems/registry";
 
 export default function Home() {
+  const problems = getAllProblems();
+
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
@@ -49,35 +43,18 @@ export default function Home() {
         </section>
 
         {/* Featured Problems */}
-        <section className="mx-auto max-w-7xl px-6 pb-24">
-          <h2 className="mb-8 text-2xl font-semibold text-foreground">
-            Featured Problems
-          </h2>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {featuredProblems.map((problem) => (
-              <Link key={problem.slug} href={`/problems/${problem.slug}`}>
-                <Card interactive className="flex flex-col gap-3">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-medium text-foreground">
-                      {problem.title}
-                    </h3>
-                    <Badge difficulty={problem.difficulty} />
-                  </div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {problem.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="rounded-md bg-elevated px-2 py-0.5 text-xs text-text-secondary"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        </section>
+        {problems.length > 0 && (
+          <section className="mx-auto max-w-7xl px-6 pb-24">
+            <h2 className="mb-8 text-2xl font-semibold text-foreground">
+              Featured Problems
+            </h2>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {problems.slice(0, 6).map((problem) => (
+                <ProblemCard key={problem.slug} problem={problem} />
+              ))}
+            </div>
+          </section>
+        )}
       </main>
 
       <Footer />
