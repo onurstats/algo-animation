@@ -2,7 +2,6 @@
 
 import { useAnimation } from "@/hooks/useAnimation";
 import { Button } from "@/components/ui/Button";
-import { Slider } from "@/components/ui/Slider";
 
 const speedOptions = [0.5, 1, 2, 4];
 
@@ -25,7 +24,7 @@ export function PlaybackControls() {
   return (
     <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-surface px-4 py-3">
       {/* Transport controls */}
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-2">
         <Button
           variant="ghost"
           size="sm"
@@ -39,15 +38,17 @@ export function PlaybackControls() {
         </Button>
 
         <Button
-          variant="ghost"
+          variant="outline"
           size="sm"
           onClick={stepBackward}
           disabled={atStart}
           aria-label="Step backward"
+          className="min-w-[80px] gap-1.5 font-semibold"
         >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
+          <span className="text-xs">Prev</span>
         </Button>
 
         <Button
@@ -56,7 +57,7 @@ export function PlaybackControls() {
           onClick={togglePlayPause}
           disabled={totalSteps === 0}
           aria-label={isPlaying ? "Pause" : "Play"}
-          className="min-w-[72px]"
+          className="min-w-[80px]"
         >
           {isPlaying ? (
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -71,13 +72,15 @@ export function PlaybackControls() {
         </Button>
 
         <Button
-          variant="ghost"
+          variant="outline"
           size="sm"
           onClick={stepForward}
           disabled={atEnd}
           aria-label="Step forward"
+          className="min-w-[80px] gap-1.5 font-semibold"
         >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <span className="text-xs">Next</span>
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
           </svg>
         </Button>
