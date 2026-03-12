@@ -24,17 +24,17 @@ Each LeetCode problem gets a dedicated animation page that includes:
 
 ## Tech Stack
 
-| Layer | Technology | Reason |
-|-------|-----------|--------|
-| Framework | **Next.js 14+ (App Router)** | SSR, routing, SEO for each problem page |
-| Language | **TypeScript** | Type safety for complex animation state |
-| Animation Engine | **Framer Motion** + **Custom Canvas (HTML5 Canvas / D3.js)** | Framer for UI transitions, Canvas/D3 for data structure visuals |
-| Styling | **Tailwind CSS** | Rapid UI development, consistent design system |
-| Code Highlighting | **Shiki** or **Prism.js** | Syntax highlighting with line-level control |
-| State Management | **Zustand** | Lightweight store for animation state, playback controls |
-| Content | **MDX** or **JSON configs** | Each problem defined as structured data |
-| Deployment | **Vercel** | Optimized for Next.js |
-| Package Manager | **pnpm** | Fast, disk-efficient |
+| Layer             | Technology                                                   | Reason                                                          |
+| ----------------- | ------------------------------------------------------------ | --------------------------------------------------------------- |
+| Framework         | **Next.js 14+ (App Router)**                                 | SSR, routing, SEO for each problem page                         |
+| Language          | **TypeScript**                                               | Type safety for complex animation state                         |
+| Animation Engine  | **Framer Motion** + **Custom Canvas (HTML5 Canvas / D3.js)** | Framer for UI transitions, Canvas/D3 for data structure visuals |
+| Styling           | **Tailwind CSS**                                             | Rapid UI development, consistent design system                  |
+| Code Highlighting | **Shiki** or **Prism.js**                                    | Syntax highlighting with line-level control                     |
+| State Management  | **Zustand**                                                  | Lightweight store for animation state, playback controls        |
+| Content           | **MDX** or **JSON configs**                                  | Each problem defined as structured data                         |
+| Deployment        | **Vercel**                                                   | Optimized for Next.js                                           |
+| Package Manager   | **pnpm**                                                     | Fast, disk-efficient                                            |
 
 ---
 
@@ -196,40 +196,40 @@ type AlgorithmPattern =
   | "math";
 
 interface Problem {
-  id: number;                         // LeetCode problem number
-  slug: string;                       // URL-friendly slug
+  id: number; // LeetCode problem number
+  slug: string; // URL-friendly slug
   title: string;
   difficulty: Difficulty;
-  description: string;                // Problem statement (supports markdown)
+  description: string; // Problem statement (supports markdown)
   constraints: string[];
   tags: AlgorithmPattern[];
   dataStructures: DataStructureType[];
   examples: TestCase[];
-  defaultInput: any;                  // Default input for the animation
+  defaultInput: any; // Default input for the animation
   complexity: {
-    time: string;                     // e.g., "O(n)"
-    space: string;                    // e.g., "O(1)"
+    time: string; // e.g., "O(n)"
+    space: string; // e.g., "O(1)"
   };
-  solutions: SolutionConfig[];        // Multiple solution approaches
+  solutions: SolutionConfig[]; // Multiple solution approaches
 }
 
 interface SolutionConfig {
-  approach: string;                   // e.g., "Hash Map", "Brute Force", "Two Pointers"
-  code: Record<Language, string>;     // Code in multiple languages
-  generateSteps: (input: any) => AnimationStep[];  // Step generator function
-  visualizerType: DataStructureType;  // Which visualizer to use
+  approach: string; // e.g., "Hash Map", "Brute Force", "Two Pointers"
+  code: Record<Language, string>; // Code in multiple languages
+  generateSteps: (input: any) => AnimationStep[]; // Step generator function
+  visualizerType: DataStructureType; // Which visualizer to use
 }
 
 type Language = "python" | "javascript" | "java" | "cpp";
 
 interface AnimationStep {
   id: number;
-  description: string;               // Human-readable explanation
-  codeLine: number;                   // Which line of code is executing
-  state: VisualizationState;          // What the visual should show
-  highlights: Highlight[];            // What elements to highlight
-  variables: Record<string, any>;     // Current variable values
-  action: AnimationAction;            // What's happening (compare, swap, insert, etc.)
+  description: string; // Human-readable explanation
+  codeLine: number; // Which line of code is executing
+  state: VisualizationState; // What the visual should show
+  highlights: Highlight[]; // What elements to highlight
+  variables: Record<string, any>; // Current variable values
+  action: AnimationAction; // What's happening (compare, swap, insert, etc.)
 }
 
 type AnimationAction =
@@ -251,31 +251,31 @@ type AnimationAction =
   | "delete-node";
 
 interface Highlight {
-  indices: number[];                  // Which elements to highlight
+  indices: number[]; // Which elements to highlight
   color: HighlightColor;
-  label?: string;                     // Optional label (e.g., "i", "j", "left", "right")
+  label?: string; // Optional label (e.g., "i", "j", "left", "right")
 }
 
 type HighlightColor =
-  | "primary"     // Currently processing (blue)
-  | "secondary"   // Secondary pointer (purple)
-  | "success"     // Found / correct (green)
-  | "danger"      // Removed / wrong (red)
-  | "warning"     // Comparing (yellow/orange)
-  | "muted"       // Already processed (gray)
-  | "accent";     // Special highlight (teal)
+  | "primary" // Currently processing (blue)
+  | "secondary" // Secondary pointer (purple)
+  | "success" // Found / correct (green)
+  | "danger" // Removed / wrong (red)
+  | "warning" // Comparing (yellow/orange)
+  | "muted" // Already processed (gray)
+  | "accent"; // Special highlight (teal)
 
 interface VisualizationState {
-  elements: any[];                    // Current state of the data structure
-  pointers?: Record<string, number>;  // Named pointers and their positions
-  auxiliary?: any;                    // Extra structures (hash map, result array, etc.)
+  elements: any[]; // Current state of the data structure
+  pointers?: Record<string, number>; // Named pointers and their positions
+  auxiliary?: any; // Extra structures (hash map, result array, etc.)
 }
 
 interface AnimationPlaybackState {
   currentStep: number;
   totalSteps: number;
   isPlaying: boolean;
-  speed: number;                      // 0.5x, 1x, 1.5x, 2x
+  speed: number; // 0.5x, 1x, 1.5x, 2x
   direction: "forward" | "backward";
 }
 
@@ -293,6 +293,7 @@ interface TestCase {
 The animation engine is the heart of the project. Here's how it works:
 
 ### Step Generation
+
 Each algorithm implementation generates an array of `AnimationStep` objects. The algorithm runs through the solution and records what happens at each meaningful step.
 
 ```typescript
@@ -358,6 +359,7 @@ function generateTwoSumSteps(nums: number[], target: number): AnimationStep[] {
 ```
 
 ### Playback Controller
+
 The Zustand store manages playback:
 
 ```typescript
@@ -384,6 +386,7 @@ interface AnimationStore {
 ## Design System
 
 ### Color Palette
+
 ```
 Background:     #0F1117 (dark navy)
 Surface:        #1A1D2E (card backgrounds)
@@ -399,11 +402,13 @@ Muted Gray:     #6B7280
 ```
 
 ### Typography
+
 - **Headings:** Inter or Cal Sans (bold, clean)
 - **Body:** Inter
 - **Code:** JetBrains Mono or Fira Code
 
 ### Animation Visual Style
+
 - Dark theme by default (easy on the eyes during long study sessions)
 - Array elements as rounded rectangles with values inside
 - Pointers as labeled arrows beneath elements
@@ -416,43 +421,46 @@ Muted Gray:     #6B7280
 ## Problem Catalog (Initial Set)
 
 ### Phase 1: Core Problems (10 problems to launch)
-| # | Problem | Difficulty | Pattern | Visualizer |
-|---|---------|-----------|---------|------------|
-| 1 | Two Sum | Easy | Hash Map | Array + HashMap |
-| 20 | Valid Parentheses | Easy | Stack | String + Stack |
-| 21 | Merge Two Sorted Lists | Easy | Linked List | LinkedList |
-| 53 | Maximum Subarray | Medium | DP / Kadane | Array |
-| 70 | Climbing Stairs | Easy | DP | Array (DP table) |
-| 121 | Best Time to Buy/Sell Stock | Easy | Sliding Window | Array + Pointers |
-| 206 | Reverse Linked List | Easy | Linked List | LinkedList |
-| 226 | Invert Binary Tree | Easy | Tree / DFS | Tree |
-| 704 | Binary Search | Easy | Binary Search | Array + Pointers |
-| 15 | 3Sum | Medium | Two Pointers | Array + Pointers |
+
+| #   | Problem                     | Difficulty | Pattern        | Visualizer       |
+| --- | --------------------------- | ---------- | -------------- | ---------------- |
+| 1   | Two Sum                     | Easy       | Hash Map       | Array + HashMap  |
+| 20  | Valid Parentheses           | Easy       | Stack          | String + Stack   |
+| 21  | Merge Two Sorted Lists      | Easy       | Linked List    | LinkedList       |
+| 53  | Maximum Subarray            | Medium     | DP / Kadane    | Array            |
+| 70  | Climbing Stairs             | Easy       | DP             | Array (DP table) |
+| 121 | Best Time to Buy/Sell Stock | Easy       | Sliding Window | Array + Pointers |
+| 206 | Reverse Linked List         | Easy       | Linked List    | LinkedList       |
+| 226 | Invert Binary Tree          | Easy       | Tree / DFS     | Tree             |
+| 704 | Binary Search               | Easy       | Binary Search  | Array + Pointers |
+| 15  | 3Sum                        | Medium     | Two Pointers   | Array + Pointers |
 
 ### Phase 2: Expand (next 15)
-| # | Problem | Difficulty | Pattern |
-|---|---------|-----------|---------|
-| 3 | Longest Substring Without Repeating | Medium | Sliding Window |
-| 11 | Container With Most Water | Medium | Two Pointers |
-| 33 | Search in Rotated Sorted Array | Medium | Binary Search |
-| 49 | Group Anagrams | Medium | Hash Map |
-| 56 | Merge Intervals | Medium | Sorting |
-| 76 | Minimum Window Substring | Hard | Sliding Window |
-| 98 | Validate BST | Medium | Tree / DFS |
-| 102 | Binary Tree Level Order | Medium | Tree / BFS |
-| 104 | Max Depth of Binary Tree | Easy | Tree / DFS |
-| 141 | Linked List Cycle | Easy | Two Pointers |
-| 200 | Number of Islands | Medium | DFS / BFS |
-| 236 | Lowest Common Ancestor | Medium | Tree / DFS |
-| 322 | Coin Change | Medium | DP |
-| 347 | Top K Frequent Elements | Medium | Heap / Hash |
-| 739 | Daily Temperatures | Medium | Stack |
+
+| #   | Problem                             | Difficulty | Pattern        |
+| --- | ----------------------------------- | ---------- | -------------- |
+| 3   | Longest Substring Without Repeating | Medium     | Sliding Window |
+| 11  | Container With Most Water           | Medium     | Two Pointers   |
+| 33  | Search in Rotated Sorted Array      | Medium     | Binary Search  |
+| 49  | Group Anagrams                      | Medium     | Hash Map       |
+| 56  | Merge Intervals                     | Medium     | Sorting        |
+| 76  | Minimum Window Substring            | Hard       | Sliding Window |
+| 98  | Validate BST                        | Medium     | Tree / DFS     |
+| 102 | Binary Tree Level Order             | Medium     | Tree / BFS     |
+| 104 | Max Depth of Binary Tree            | Easy       | Tree / DFS     |
+| 141 | Linked List Cycle                   | Easy       | Two Pointers   |
+| 200 | Number of Islands                   | Medium     | DFS / BFS      |
+| 236 | Lowest Common Ancestor              | Medium     | Tree / DFS     |
+| 322 | Coin Change                         | Medium     | DP             |
+| 347 | Top K Frequent Elements             | Medium     | Heap / Hash    |
+| 739 | Daily Temperatures                  | Medium     | Stack          |
 
 ---
 
 ## SEO & Metadata Strategy
 
 Each problem page should have:
+
 - **Title:** `{Problem Title} — Animated Solution | AlgoAnimation`
 - **Description:** `Visual step-by-step animation of LeetCode #{id}: {title}. Watch the {pattern} algorithm solve this {difficulty} problem.`
 - **Open Graph image:** Auto-generated card with problem title + difficulty badge + mini visualization preview
@@ -463,18 +471,18 @@ Each problem page should have:
 
 ## Keyboard Shortcuts
 
-| Key | Action |
-|-----|--------|
-| `Space` | Play / Pause |
-| `→` | Step forward |
-| `←` | Step backward |
-| `Shift + →` | Jump forward 5 steps |
-| `Shift + ←` | Jump backward 5 steps |
-| `Home` | Go to first step |
-| `End` | Go to last step |
-| `1-4` | Set speed (0.5x, 1x, 1.5x, 2x) |
-| `R` | Reset animation |
-| `F` | Fullscreen visualization |
+| Key         | Action                         |
+| ----------- | ------------------------------ |
+| `Space`     | Play / Pause                   |
+| `→`         | Step forward                   |
+| `←`         | Step backward                  |
+| `Shift + →` | Jump forward 5 steps           |
+| `Shift + ←` | Jump backward 5 steps          |
+| `Home`      | Go to first step               |
+| `End`       | Go to last step                |
+| `1-4`       | Set speed (0.5x, 1x, 1.5x, 2x) |
+| `R`         | Reset animation                |
+| `F`         | Fullscreen visualization       |
 
 ---
 
@@ -508,6 +516,7 @@ pnpm new-problem --id 1 --slug two-sum
 ## Guidelines for Development
 
 ### When adding a new problem:
+
 1. Create problem config in `src/lib/problems/data/{slug}.ts`
 2. Create algorithm step generator in `src/lib/algorithms/{slug}.ts`
 3. Register it in `src/lib/problems/registry.ts`
@@ -515,6 +524,7 @@ pnpm new-problem --id 1 --slug two-sum
 5. The page route `src/app/problems/[slug]/page.tsx` handles rendering dynamically
 
 ### Code style:
+
 - Use TypeScript strict mode
 - Prefer functional components with hooks
 - Keep animation logic separate from rendering logic
@@ -523,6 +533,7 @@ pnpm new-problem --id 1 --slug two-sum
 - Write human-friendly explanations, not just "step 3 of 10"
 
 ### Animation quality:
+
 - Every step must have a clear, concise `description`
 - Highlight changes visually — the user should instantly see what changed
 - Use appropriate colors (green = found/success, red = removed, blue = current, gray = processed)
@@ -530,6 +541,7 @@ pnpm new-problem --id 1 --slug two-sum
 - Support mobile layouts (canvas should resize)
 
 ### Performance:
+
 - Pre-generate all steps before animation starts (don't compute during playback)
 - Use `requestAnimationFrame` for smooth canvas rendering
 - Memoize expensive calculations

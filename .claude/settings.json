@@ -1,0 +1,11 @@
+{
+  "hooks": {
+    "afterToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "command": "npx prettier --write \"$CLAUDE_FILE_PATH\" 2>/dev/null || true",
+        "description": "Run Prettier on edited/written files"
+      }
+    ]
+  }
+}
