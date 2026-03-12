@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import type { AnimationStep } from "@/lib/types";
+import { highlightStrokeColors, highlightFillColors } from "@/lib/constants/colors";
 
 interface TreeVisualizerProps {
   step: AnimationStep;
@@ -97,24 +98,10 @@ export function TreeVisualizer({ step, width }: TreeVisualizerProps) {
             const x = ((nodeIdx + 0.5) / nodeCount) * levelWidth;
             const y = levelIdx * verticalGap + nodeSize / 2;
             const fillColor = highlight
-              ? {
-                  current: "#3b82f633",
-                  secondary: "#8b5cf633",
-                  success: "#22c55e33",
-                  removed: "#ef444433",
-                  comparing: "#eab30833",
-                  processed: "#6b728033",
-                }[highlight.color]
+              ? highlightFillColors[highlight.color]
               : "#2a2d3e";
             const strokeColor = highlight
-              ? {
-                  current: "#3b82f6",
-                  secondary: "#8b5cf6",
-                  success: "#22c55e",
-                  removed: "#ef4444",
-                  comparing: "#eab308",
-                  processed: "#6b7280",
-                }[highlight.color]
+              ? highlightStrokeColors[highlight.color]
               : "#3b3f54";
 
             return (
