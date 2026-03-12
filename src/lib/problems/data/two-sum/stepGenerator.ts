@@ -1,110 +1,163 @@
 import type { AnimationStep } from "@/lib/types";
 import { createStep } from "@/lib/engine/stepGenerator";
 
+/*
+ * Line reference:
+ * 1: function twoSum(nums, target) {
+ * 2:   const map = new Map();
+ * 3:   for (let i = 0; i < nums.length; i++) {
+ * 4:     const complement = target - nums[i];
+ * 5:     if (map.has(complement)) {
+ * 6:       return [map.get(complement), i];
+ * 7:     }
+ * 8:     map.set(nums[i], i);
+ * 9:   }
+ * 10:  return [];
+ * 11: }
+ */
+
 export function generateSteps(input: Record<string, unknown>): AnimationStep[] {
   const nums = input.nums as number[];
   const target = input.target as number;
   const steps: AnimationStep[] = [];
   let id = 0;
 
-  // Step 0: Introduction
+  const map = new Map<number, number>();
+
+  function snap() {
+    return Object.fromEntries(map);
+  }
+
+  function processed() {
+    return Array.from(map.values()).map((idx) => ({
+      index: idx,
+      color: "processed" as const,
+    }));
+  }
+
+  // Line 1: function twoSum(nums, target) {
   steps.push(
     createStep(id++, {
       action: "highlight",
-      description: `Start: nums = [${nums.join(", ")}], target = ${target}. Find two numbers that add up to ${target}.`,
+      description: `twoSum([${nums.join(", ")}], ${target})`,
       codeLineNumber: 1,
       data: { nums: [...nums], target },
       auxiliaryData: { map: {} },
     }),
   );
 
-  // Step 1: Initialize map
+  // Line 2: const map = new Map();
   steps.push(
     createStep(id++, {
-      action: "highlight",
-      description: "Initialize an empty hash map to store {value → index} pairs.",
+      action: "set",
+      description: `const map = new Map()  →  map = {}`,
       codeLineNumber: 2,
       data: { nums: [...nums], target },
       auxiliaryData: { map: {} },
     }),
   );
 
-  const map = new Map<number, number>();
-
   for (let i = 0; i < nums.length; i++) {
-    const complement = target - nums[i];
-    const mapObj = Object.fromEntries(map);
-
-    // Check complement
+    // Line 3: for (let i = 0; i < nums.length; i++)  — condition check
     steps.push(
       createStep(id++, {
-        action: "compare",
-        description: `i=${i}: nums[${i}] = ${nums[i]}. Complement = ${target} - ${nums[i]} = ${complement}. Is ${complement} in the map? ${map.has(complement) ? "Yes!" : "No."}`,
-        highlights: [
-          ...Array.from(map.values()).map((idx) => ({
-            index: idx,
-            color: "processed" as const,
-          })),
-          { index: i, color: "current" as const },
-        ],
-        pointers: [{ index: i, label: "i", color: "current" as const }],
-        codeLineNumber: 4,
-        data: { nums: [...nums], target, i, complement },
-        auxiliaryData: { map: { ...mapObj } },
+        action: "traverse",
+        description: `for: i = ${i}, i < ${nums.length} → true, entering loop body`,
+        highlights: [...processed(), { index: i, color: "current" }],
+        pointers: [{ index: i, label: "i", color: "current" }],
+        codeLineNumber: 3,
+        data: { nums: [...nums], target, i },
+        auxiliaryData: { map: snap() },
       }),
     );
 
-    if (map.has(complement)) {
+    const complement = target - nums[i];
+
+    // Line 4: const complement = target - nums[i];
+    steps.push(
+      createStep(id++, {
+        action: "compare",
+        description: `const complement = ${target} - ${nums[i]}  →  complement = ${complement}`,
+        highlights: [...processed(), { index: i, color: "current" }],
+        pointers: [{ index: i, label: "i", color: "current" }],
+        codeLineNumber: 4,
+        data: { nums: [...nums], target, i, complement },
+        auxiliaryData: { map: snap() },
+      }),
+    );
+
+    const found = map.has(complement);
+
+    // Line 5: if (map.has(complement))
+    steps.push(
+      createStep(id++, {
+        action: "compare",
+        description: `map.has(${complement})  →  ${found}`,
+        highlights: [...processed(), { index: i, color: found ? "success" : "current" }],
+        pointers: [{ index: i, label: "i", color: found ? "success" : "current" }],
+        codeLineNumber: 5,
+        data: { nums: [...nums], target, i, complement },
+        auxiliaryData: { map: snap() },
+      }),
+    );
+
+    if (found) {
       const j = map.get(complement)!;
 
-      // Found!
+      // Line 6: return [map.get(complement), i];
       steps.push(
         createStep(id++, {
           action: "found",
-          description: `Found! nums[${j}] + nums[${i}] = ${nums[j]} + ${nums[i]} = ${target}. Return [${j}, ${i}].`,
+          description: `return [map.get(${complement}), ${i}]  →  return [${j}, ${i}]`,
           highlights: [
-            { index: j, color: "success" as const },
-            { index: i, color: "success" as const },
+            { index: j, color: "success" },
+            { index: i, color: "success" },
           ],
           codeLineNumber: 6,
           data: { nums: [...nums], target, i, complement, result: [j, i] },
-          auxiliaryData: { map: { ...mapObj } },
+          auxiliaryData: { map: snap() },
         }),
       );
 
       return steps;
     }
 
-    // Store in map
+    // Line 8: map.set(nums[i], i);
     map.set(nums[i], i);
-    const updatedMapObj = Object.fromEntries(map);
 
     steps.push(
       createStep(id++, {
         action: "set",
-        description: `${complement} not found. Store nums[${i}]=${nums[i]} → index ${i} in map.`,
-        highlights: [
-          ...Array.from(map.values()).map((idx) => ({
-            index: idx,
-            color: "processed" as const,
-          })),
-        ],
-        pointers: [{ index: i, label: "i", color: "processed" as const }],
+        description: `map.set(${nums[i]}, ${i})  →  map = {${[...map.entries()].map(([k, v]) => `${k}: ${v}`).join(", ")}}`,
+        highlights: processed(),
+        pointers: [{ index: i, label: "i", color: "processed" }],
         codeLineNumber: 8,
         data: { nums: [...nums], target, i, complement },
-        auxiliaryData: { map: { ...updatedMapObj } },
+        auxiliaryData: { map: snap() },
       }),
     );
   }
 
-  // No solution found
+  // Line 3: for condition false (loop ended)
+  steps.push(
+    createStep(id++, {
+      action: "traverse",
+      description: `for: i = ${nums.length}, i < ${nums.length} → false, loop ended`,
+      highlights: processed(),
+      codeLineNumber: 3,
+      data: { nums: [...nums], target, i: nums.length },
+      auxiliaryData: { map: snap() },
+    }),
+  );
+
+  // Line 10: return [];
   steps.push(
     createStep(id++, {
       action: "not-found",
-      description: "No two numbers add up to target. Return empty array.",
+      description: `return []  →  no pair found`,
       codeLineNumber: 10,
       data: { nums: [...nums], target, result: [] },
-      auxiliaryData: { map: Object.fromEntries(map) },
+      auxiliaryData: { map: snap() },
     }),
   );
 
